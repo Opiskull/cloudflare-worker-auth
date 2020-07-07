@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "commonjs",
+    "target": "ES6",
+    "lib": ["ES6", "webworker"],
+    "alwaysStrict": true,
+    "strict": true,
+    "preserveConstEnums": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["@cloudflare/workers-types", "jest"]
+  },
+  "include": ["./src/*.ts", "./src/**/*.ts"],
+  "exclude": ["node_modules/", "dist/"]
+}
