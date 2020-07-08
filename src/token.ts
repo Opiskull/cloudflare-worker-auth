@@ -32,47 +32,40 @@ export const validateToken = (token: {
   exp: number;
   iat: number;
 }) => {
-  try {
-    const dateInSecs = (d: Date) => Math.ceil(Number(d) / 1000);
-    const date = new Date();
+  const dateInSecs = (d: Date) => Math.ceil(Number(d) / 1000);
+  const date = new Date();
 
-    let iss = token.iss;
+  let iss = token.iss;
 
-    // ISS can include a trailing slash but should otherwise be identical to
-    // the config.domain, so we should remove the trailing slash if it exists
-    iss = iss.endsWith('/') ? iss.slice(0, -1) : iss;
+  // ISS can include a trailing slash but should otherwise be identical to
+  // the config.domain, so we should remove the trailing slash if it exists
+  iss = iss.endsWith('/') ? iss.slice(0, -1) : iss;
 
-    if (iss !== config.domain) {
-      throw new Error(
-        `Token iss value (${iss}) doesn't match domain (${config.domain})`
-      );
-    }
+  if (iss !== config.domain) {
+    throw new Error(
+      `Token iss value (${iss}) doesn't match domain (${config.domain})`
+    );
+  }
 
-    if (token.aud !== config.clientId) {
-      throw new Error(
-        `Token aud value (${token.aud}) doesn't match clientId (${config.clientId})`
-      );
-    }
+  if (token.aud !== config.clientId) {
+    throw new Error(
+      `Token aud value (${token.aud}) doesn't match clientId (${config.clientId})`
+    );
+  }
 
-    if (token.exp < dateInSecs(date)) {
-      throw new Error(`Token exp value is before current time`);
-    }
+  if (token.exp < dateInSecs(date)) {
+    throw new Error(`Token exp value is before current time`);
+  }
 
-    // Token should have been issued within the last day
-    date.setDate(date.getDate() - 1);
-    if (token.iat < dateInSecs(date)) {
-      throw new Error(`Token was issued before one day ago and is now invalid`);
-    }
-
-    return true;
-  } catch (err) {
-    console.log(err.message);
-    return false;
+  // Token should have been issued within the last day
+  date.setDate(date.getDate() - 1);
+  if (token.iat < dateInSecs(date)) {
+    throw new Error(`Token was issued before one day ago and is now invalid`);
   }
 };
 
 export const encryptSub = async (sub: string) => {
-  const text = new TextEncoder().encode(`${SALT}-${sub}`);
+  const text = new TextEncoder().encode(`${CONFIG_SALT}-${sub}`);
   const digest = await crypto.subtle.digest({ name: 'SHA-256' }, text);
   const digestArray = new Uint8Array(digest);
   return btoa(

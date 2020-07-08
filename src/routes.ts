@@ -24,7 +24,7 @@ export const callback = async (event: FetchEvent): Promise<Response> => {
   if (!authorizedResponse) {
     return new Response('Unauthorized', { status: 401 });
   }
-  return new Response(null, {
+  return new Response(authorizedResponse.body, {
     ...authorizedResponse
   });
 };

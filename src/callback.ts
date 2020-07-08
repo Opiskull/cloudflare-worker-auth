@@ -5,15 +5,17 @@ import { config } from './config';
 
 export const createRedirectUrl = async () => {
   const state = await generateStateParam();
-  return `${config.domain}/authorize?response_type=code&client_id=${
+  return `${config.authorization_endpoint}?response_type=code&client_id=${
     config.clientId
   }&redirect_uri=${
     config.callbackUrl
-  }&scope=openid%20profile%20email&state=${encodeURIComponent(state)}`;
+  }&scope=openid%20profile%20email&state=${encodeURIComponent(
+    state
+  )}&nonce=12345`;
 };
 
 export const exchangeCode = async (code: string) => {
-  const body = JSON.stringify({
+  const body = new URLSearchParams({
     grant_type: 'authorization_code',
     client_id: config.clientId,
     client_secret: config.clientSecret,
@@ -22,9 +24,11 @@ export const exchangeCode = async (code: string) => {
   });
 
   return persistAuth(
-    await fetch(`${config.domain}/oauth/token`, {
+    await fetch(`${config.token_endpoint}`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
       body
     })
   );
@@ -34,13 +38,14 @@ const persistAuth = async (exchange: Response) => {
   const body = await exchange.json();
 
   if (body.error) {
-    throw new Error(body.error);
+    throw new Error(JSON.stringify(body));
   }
 
   const decoded = JSON.parse(decodeJWT(body.id_token));
-  const validToken = validateToken(decoded);
-  if (!validToken) {
-    return { status: 401 };
+  try {
+    validateToken(decoded);
+  } catch (err) {
+    return { status: 401, body: err.message };
   }
 
   const id = await encryptSub(decoded.sub);

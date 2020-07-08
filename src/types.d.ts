@@ -1,10 +1,12 @@
-export {}
+export {};
 
 declare global {
-  const AUTH_STORE: KVNamespace
-  const SALT: string
-  const AUTH0_DOMAIN: string
-  const AUTH0_CLIENT_ID: string
-  const AUTH0_CLIENT_SECRET: string
-  const AUTH0_CALLBACK_URL: string
+  const AUTH_STORE: KVNamespace;
+  const CONFIG_SALT: string;
+  const CONFIG_AUTHORIZATION_ENDPOINT: string;
+  const CONFIG_TOKEN_ENDPOINT: string;
+  const CONFIG_DOMAIN: string;
+  const CONFIG_CLIENT_ID: string;
+  const CONFIG_CLIENT_SECRET: string;
+  const CONFIG_CALLBACK_URL: string;
 }
