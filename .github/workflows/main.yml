@@ -11,7 +11,38 @@ jobs:
     name: Deploy
     steps:
       - uses: actions/checkout@v2
+      - name: Add wrangler.toml
+        run: |
+          cp ./wrangler.example.toml ./wrangler.toml
+      - name: Replace CF_ACCOUNT_ID
+        uses: jwsi/secret-parser@v1
+        with:
+          filename: ./wrangler.toml
+          secret-name: CF_ACCOUNT_ID
+          secret-value: ${{ secrets.CF_ACCOUNT_ID }}
+      - name: Replace CF_KV_NAMESPACE_ID
+        uses: jwsi/secret-parser@v1
+        with:
+          filename: ./wrangler.toml
+          secret-name: CF_KV_NAMESPACE_ID
+          secret-value: ${{ secrets.CF_KV_NAMESPACE_ID }}
       - name: Publish
         uses: cloudflare/wrangler-action@1.2.0
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
+          secrets: |
+            CONFIG_DOMAIN
+            CONFIG_AUTHORIZATION_ENDPOINT
+            CONFIG_TOKEN_ENDPOINT
+            CONFIG_CLIENT_ID
+            CONFIG_CLIENT_SECRET
+            CONFIG_CALLBACK_URL
+            CONFIG_SALT
+        env:
+          CONFIG_DOMAIN: ${{ secrets.CONFIG_DOMAIN }}
+          CONFIG_AUTHORIZATION_ENDPOINT: ${{ secrets.CONFIG_AUTHORIZATION_ENDPOINT }}
+          CONFIG_TOKEN_ENDPOINT: ${{ secrets.CONFIG_TOKEN_ENDPOINT }}
+          CONFIG_CLIENT_ID: ${{ secrets.CONFIG_CLIENT_ID }}
+          CONFIG_CLIENT_SECRET: ${{ secrets.CONFIG_CLIENT_SECRET }}
+          CONFIG_CALLBACK_URL: ${{ secrets.CONFIG_CALLBACK_URL }}
+          CONFIG_SALT: ${{ secrets.CONFIG_SALT }}
