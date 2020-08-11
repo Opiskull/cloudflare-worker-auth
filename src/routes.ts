@@ -1,11 +1,14 @@
 import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
-import { clearAuthCookie, hasAuthCookie } from './cookie';
+import { clearAuthCookie, hasAuthCookie, getAuthCookie } from './cookie';
 import { handleRedirect } from './callback';
 
 export const logout = async (event: FetchEvent): Promise<Response> => {
   const response = await getAssetFromKV(event);
 
   if (hasAuthCookie(event.request)) {
+    const id = getAuthCookie(event.request);
+    await AUTH_STORE.delete(id);
+
     return new Response(response.body, {
       ...response,
       headers: {
