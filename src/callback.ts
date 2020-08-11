@@ -3,8 +3,8 @@ import { generateStateParam } from './state';
 import { decodeJWT, validateToken, encryptSub } from './token';
 import { config } from './config';
 
-export const createRedirectUrl = async () => {
-  const state = await generateStateParam();
+export const createRedirectUrl = async (url: URL) => {
+  const state = await generateStateParam(url.toString());
   return `${config.authorization_endpoint}?response_type=code&client_id=${
     config.clientId
   }&redirect_uri=${
@@ -14,7 +14,7 @@ export const createRedirectUrl = async () => {
   )}&nonce=12345`;
 };
 
-export const exchangeCode = async (code: string) => {
+export const exchangeCode = async (code: string, returnTo: string) => {
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     client_id: config.clientId,
@@ -30,11 +30,12 @@ export const exchangeCode = async (code: string) => {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       body
-    })
+    }),
+    returnTo
   );
 };
 
-const persistAuth = async (exchange: Response) => {
+const persistAuth = async (exchange: Response, returnTo: string) => {
   const body = await exchange.json();
 
   if (body.error) {
@@ -50,10 +51,12 @@ const persistAuth = async (exchange: Response) => {
 
   const id = await encryptSub(decoded.sub);
 
-  await AUTH_STORE.put(id, JSON.stringify(body));
+  await AUTH_STORE.put(id, JSON.stringify(body), {
+    expirationTtl: 7 * 24 * 60 * 60
+  });
 
   const headers = {
-    Location: '/',
+    Location: returnTo,
     ...setAuthCookie(id)
   };
 
@@ -75,7 +78,7 @@ export const handleRedirect = async (request: Request) => {
 
   const code = url.searchParams.get('code');
   if (code) {
-    return exchangeCode(code);
+    return exchangeCode(code, storedState);
   }
 
   return null;

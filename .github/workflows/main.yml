@@ -38,7 +38,9 @@ jobs:
             CONFIG_CLIENT_SECRET
             CONFIG_CALLBACK_URL
             CONFIG_SALT
+            CONFIG_ISSUER
         env:
+          CONFIG_ISSUER: ${{ secrets.CONFIG_ISSUER }}
           CONFIG_DOMAIN: ${{ secrets.CONFIG_DOMAIN }}
           CONFIG_AUTHORIZATION_ENDPOINT: ${{ secrets.CONFIG_AUTHORIZATION_ENDPOINT }}
           CONFIG_TOKEN_ENDPOINT: ${{ secrets.CONFIG_TOKEN_ENDPOINT }}

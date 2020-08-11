@@ -30,7 +30,7 @@ export const handleRequest = async (event: FetchEvent) => {
     }
 
     if (!isAuthorized) {
-      const redirectUrl = await createRedirectUrl();
+      const redirectUrl = await createRedirectUrl(url);
       return Response.redirect(redirectUrl);
     }
 

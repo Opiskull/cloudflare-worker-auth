@@ -1,4 +1,5 @@
 import { config } from './config';
+import { getRandomValue } from './state';
 
 // https://github.com/pose/webcrypto-jwt/blob/master/index.js
 export const decodeJWT = function (token: string) {
@@ -38,12 +39,12 @@ export const validateToken = (token: {
   let iss = token.iss;
 
   // ISS can include a trailing slash but should otherwise be identical to
-  // the config.domain, so we should remove the trailing slash if it exists
+  // the config.issuer, so we should remove the trailing slash if it exists
   iss = iss.endsWith('/') ? iss.slice(0, -1) : iss;
 
-  if (iss !== config.domain) {
+  if (iss !== config.issuer) {
     throw new Error(
-      `Token iss value (${iss}) doesn't match domain (${config.domain})`
+      `Token iss value (${iss}) doesn't match issuer (${config.issuer})`
     );
   }
 
@@ -65,7 +66,8 @@ export const validateToken = (token: {
 };
 
 export const encryptSub = async (sub: string) => {
-  const text = new TextEncoder().encode(`${CONFIG_SALT}-${sub}`);
+  const salt = await getRandomValue();
+  const text = new TextEncoder().encode(`${CONFIG_SALT}-${sub}-${salt}`);
   const digest = await crypto.subtle.digest({ name: 'SHA-256' }, text);
   const digestArray = new Uint8Array(digest);
   return btoa(

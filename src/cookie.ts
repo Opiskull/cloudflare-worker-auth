@@ -1,18 +1,17 @@
 import { parse, serialize } from 'cookie';
-
-const cookieKey = 'AUTH';
+import { config } from './config';
 
 export const hasAuthCookie = (request: Request) => {
   const cookieHeader = request.headers.get('Cookie');
-  return cookieHeader && cookieHeader.includes(cookieKey);
+  return cookieHeader && cookieHeader.includes(config.cookieName);
 };
 
 export const getAuthCookie = (request: Request) => {
   const cookieHeader = request.headers.get('Cookie');
 
-  if (cookieHeader && cookieHeader.includes(cookieKey)) {
+  if (cookieHeader && cookieHeader.includes(config.cookieName)) {
     const cookies = parse(cookieHeader);
-    return cookies[cookieKey];
+    return cookies[config.cookieName];
   }
   return '';
 };
@@ -21,21 +20,23 @@ export const setAuthCookie = (id: string) => {
   const date = new Date();
   date.setDate(date.getDate() + 1);
   return {
-    'Set-cookie': serialize(cookieKey, id, {
+    'Set-cookie': serialize(config.cookieName, id, {
       secure: true,
       httpOnly: true,
       sameSite: 'lax',
-      expires: date
+      expires: date,
+      domain: config.domain
     })
   };
 };
 
 export const clearAuthCookie = () => {
   return {
-    'Set-cookie': serialize(cookieKey, '', {
+    'Set-cookie': serialize(config.cookieName, '', {
       secure: true,
       httpOnly: true,
-      sameSite: 'lax'
+      sameSite: 'lax',
+      domain: config.domain
     })
   };
 };
