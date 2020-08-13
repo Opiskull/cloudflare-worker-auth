@@ -32,6 +32,6 @@ export const authorize = async (event: FetchEvent) => {
   if (authorization.accessToken) {
     return { isAuthorized: true, authorization };
   } else {
-    return { isAuthorized: false, authorization: undefined };
+    return { isAuthorized: false };
   }
 };

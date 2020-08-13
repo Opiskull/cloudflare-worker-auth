@@ -1,11 +1,13 @@
 import { setAuthCookie } from './cookie';
 import { generateStateParam } from './state';
 import { decodeJWT, validateToken, encryptSub } from './token';
-import { config } from './config';
+import { config } from '../config';
 
 export const createRedirectUrl = async (url: URL) => {
   const state = await generateStateParam(url.toString());
-  return `${config.authorization_endpoint}?response_type=code&client_id=${
+  return `${
+    config.authorization_endpoint
+  }?response_type=code&audience=peerzone&client_id=${
     config.clientId
   }&redirect_uri=${
     config.callbackUrl
@@ -23,21 +25,21 @@ export const exchangeCode = async (code: string, returnTo: string) => {
     redirect_uri: config.callbackUrl
   });
 
-  return persistAuth(
-    await fetch(`${config.token_endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body
-    }),
-    returnTo
-  );
+  const exchange = await fetch(config.token_endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body
+  });
+
+  return persistAuth(await exchange.json(), returnTo);
 };
 
-const persistAuth = async (exchange: Response, returnTo: string) => {
-  const body = await exchange.json();
-
+const persistAuth = async (
+  body: { error?: any; id_token: string },
+  returnTo: string
+) => {
   if (body.error) {
     throw new Error(JSON.stringify(body));
   }
@@ -52,15 +54,16 @@ const persistAuth = async (exchange: Response, returnTo: string) => {
   const id = await encryptSub(decoded.sub);
 
   await AUTH_STORE.put(id, JSON.stringify(body), {
-    expirationTtl: 7 * 24 * 60 * 60
+    expirationTtl: 24 * 61 * 60
   });
 
-  const headers = {
-    Location: returnTo,
-    ...setAuthCookie(id)
+  return {
+    headers: {
+      Location: returnTo,
+      ...setAuthCookie(id)
+    },
+    status: 302
   };
-
-  return { headers, status: 302 };
 };
 
 export const handleRedirect = async (request: Request) => {

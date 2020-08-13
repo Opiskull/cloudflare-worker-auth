@@ -1,5 +1,5 @@
 import { parse, serialize } from 'cookie';
-import { config } from './config';
+import { config } from '../config';
 
 export const hasAuthCookie = (request: Request) => {
   const cookieHeader = request.headers.get('Cookie');

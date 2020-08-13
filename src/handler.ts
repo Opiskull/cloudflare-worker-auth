@@ -1,53 +1,26 @@
-import { hydrateState } from './state';
-import { getAssetFromKV } from '@cloudflare/kv-asset-handler';
-import { logout, callback } from './routes';
-import { authorize } from './authorize';
-import { createRedirectUrl } from './callback';
-// see the readme for more info on what these config options do!
-const config = {
-  // opt into automatic authorization state hydration
-  hydrateState: true,
-  // return responses at the edge
-  originless: true
-};
+import { Context } from './context';
+import { filesHandler } from './files-handler/index';
+import { listHandler } from './list-handler/index';
+import { oidcHandler } from './oidc-handler/index';
+import { compose } from './compose';
 
-export const handleRequest = async (event: FetchEvent) => {
+export const handleRequest = async (event: FetchEvent): Promise<Response> => {
   try {
-    let request = event.request;
+    const list = [oidcHandler, listHandler, filesHandler];
 
-    const { isAuthorized, authorization } = await authorize(event);
-    if (isAuthorized && authorization?.accessToken) {
-      request = new Request(request, {
-        headers: {
-          Authorization: `Bearer ${authorization.accessToken}`
-        }
-      });
-    }
+    const composer = compose(list);
 
-    const url = new URL(event.request.url);
-    if (url.pathname === '/callback') {
-      return await callback(event);
-    }
+    const context = new Context(event);
 
-    if (!isAuthorized) {
-      const redirectUrl = await createRedirectUrl(url);
-      return Response.redirect(redirectUrl);
-    }
+    await composer(context, () => Promise.resolve());
 
-    if (url.pathname === '/logout') {
-      return await logout(event);
-    }
+    return context.response
+      ? context.response
+      : new Response('404 not found', { status: 404 });
 
-    const response = await getAssetFromKV(event);
-
-    // hydrate the static site with authorization info from provider
-    // and the htmlrewriter engine
-    return config.hydrateState
-      ? new HTMLRewriter()
-          .on('script#edge_state', hydrateState(authorization?.userInfo))
-          .transform(response)
-      : response;
+    // return compose(any);
+    // return oidcHandler(event, (e) => listHandler(e, (e) => filesHandler(e)));
   } catch (err) {
-    return new Response(err.toString());
+    return new Response(JSON.stringify(err));
   }
 };

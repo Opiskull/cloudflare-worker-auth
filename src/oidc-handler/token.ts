@@ -1,4 +1,4 @@
-import { config } from './config';
+import { config } from '../config';
 import { getRandomValue } from './state';
 
 // https://github.com/pose/webcrypto-jwt/blob/master/index.js
@@ -69,8 +69,7 @@ export const encryptSub = async (sub: string) => {
   const salt = await getRandomValue();
   const text = new TextEncoder().encode(`${CONFIG_SALT}-${sub}-${salt}`);
   const digest = await crypto.subtle.digest({ name: 'SHA-256' }, text);
-  const digestArray = new Uint8Array(digest);
   return btoa(
-    String.fromCharCode.apply(null, (digestArray as unknown) as number[])
+    String.fromCharCode.apply(null, Array.from(new Uint8Array(digest)))
   );
 };
