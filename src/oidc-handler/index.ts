@@ -3,14 +3,13 @@ import { callback, logout } from './routes';
 import { createRedirectUrl } from './callback';
 import { Context } from '../context';
 
-export const oidcHandler = async (ctx: Context, next: () => Promise<void>) => {
-  let request = ctx.event.request;
+export const oidcHandler = () => async (ctx: Context, next: () => Promise<void>) => {
   const event = ctx.event;
 
   const { isAuthorized, authorization } = await authorize(event);
   if (isAuthorized && authorization?.accessToken) {
     ctx.items['authorization'] = authorization;
-    request = new Request(request, {
+    ctx.request = new Request(event.request, {
       headers: {
         Authorization: `Bearer ${authorization.accessToken}`
       }

@@ -16,7 +16,7 @@ export class HostnameTransformer implements RequestTransformer {
       this.forwardFromHostname.toLocaleLowerCase()
     ) {
       url.hostname = this.forwardToHostname;
-      return new Request(new Request(url.toString()), request);
+      return new Request(url.toString(), request);
     }
     return request;
   }

@@ -10,11 +10,11 @@ const streamResponse = async (request: Request): Promise<Response> => {
   return new Response(readable, response);
 };
 
-export const listHandler = async (ctx: Context, next: () => Promise<void>) => {
+export const streamHandler = (from: string, to: string) => async (ctx: Context, next: () => Promise<void>) => {
   const event = ctx.event;
   const request = await new HostnameTransformer(
-    'list.onuk.dev',
-    'items-list.vercel.app'
+    from,
+    to
   ).transform({
     ...event.request,
     ...{

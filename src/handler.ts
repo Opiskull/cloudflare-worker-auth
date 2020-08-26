@@ -1,14 +1,14 @@
 import { Context } from './context';
 import { filesHandler } from './files-handler/index';
-import { listHandler } from './list-handler/index';
+import { streamHandler } from './stream-handler/index';
 import { oidcHandler } from './oidc-handler/index';
 import { compose } from './compose';
 
 export const handleRequest = async (event: FetchEvent): Promise<Response> => {
   try {
-    const list = [oidcHandler, listHandler, filesHandler];
+    const middlewares = [oidcHandler(), streamHandler('list.onuk.dev','items-list.vercel.app'), filesHandler()];
 
-    const composer = compose(list);
+    const composer = compose(middlewares);
 
     const context = new Context(event);
 
@@ -17,9 +17,6 @@ export const handleRequest = async (event: FetchEvent): Promise<Response> => {
     return context.response
       ? context.response
       : new Response('404 not found', { status: 404 });
-
-    // return compose(any);
-    // return oidcHandler(event, (e) => listHandler(e, (e) => filesHandler(e)));
   } catch (err) {
     return new Response(JSON.stringify(err));
   }

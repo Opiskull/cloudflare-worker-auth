@@ -7,6 +7,8 @@ export const config = {
   authorization_endpoint: CONFIG_AUTHORIZATION_ENDPOINT,
   // openidconnect token endpoint
   token_endpoint: CONFIG_TOKEN_ENDPOINT,
+  // audience
+  audience: CONFIG_AUDIENCE,
 
   // client Id
   clientId: CONFIG_CLIENT_ID,

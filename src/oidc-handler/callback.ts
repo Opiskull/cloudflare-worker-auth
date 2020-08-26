@@ -7,7 +7,9 @@ export const createRedirectUrl = async (url: URL) => {
   const state = await generateStateParam(url.toString());
   return `${
     config.authorization_endpoint
-  }?response_type=code&audience=peerzone&client_id=${
+  }?response_type=code&audience=${
+    config.audience
+  }&client_id=${
     config.clientId
   }&redirect_uri=${
     config.callbackUrl
