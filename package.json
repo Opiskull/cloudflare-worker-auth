@@ -24,10 +24,10 @@
     "node-fetch": "^2.6.0",
     "service-worker-mock": "^2.0.5",
     "ts-jest": "^26.2.0",
-    "ts-loader": "^8.0.2",
+    "ts-loader": "^8.4.0",
     "types-cloudflare-worker": "^1.2.0",
     "typescript": "^3.9.7",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
   }
 }
